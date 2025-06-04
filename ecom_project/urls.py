@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('ecom_app.urls')),  # Make sure 'ecom_app' is the correct app name
     path('store/', include('store.urls')),  # Make sure 'ecom_app' is the correct app name
+    path('cart/', include('carts.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
