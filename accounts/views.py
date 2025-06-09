@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect
+import requests
+from urllib.parse import urlparse, parse_qs
+
 from django.contrib import messages
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm
 from .models import Account
+from carts.models import Cart, CartItem  # Add this import for Cart and CartItem models
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
@@ -11,6 +15,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
+from carts.views import _cart_id  # Import _cart_id function if defined in carts/views.py
 
 def register(request):
     if request.method == 'POST':
@@ -66,13 +71,62 @@ def login(request):
         user = auth.authenticate(request, email=email, password=password)
 
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_items = CartItem.objects.filter(cart=cart)
+
+                    # Store variations from the current cart
+                    product_variation = []
+                    for item in cart_items:
+                        variation = item.variation.all()
+                        product_variation.append(list(variation))
+
+                    # Get user cart items
+                    user_cart_items = CartItem.objects.filter(user=user)
+                    existing_var_list = []
+                    item_ids = []
+
+                    for item in user_cart_items:
+                        existing_var = item.variation.all()
+                        existing_var_list.append(list(existing_var))
+                        item_ids.append(item.id)
+
+                    # Check if variation already exists in user cart
+                    for pr in product_variation:
+                        if pr in existing_var_list:
+                            index = existing_var_list.index(pr)
+                            item_id = item_ids[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity += 1
+                            item.save()
+                        else:
+                            # Assign cart item to the user
+                            for item in cart_items:
+                                item.user = user
+                                item.save()
+            except Cart.DoesNotExist:
+                pass
+
             auth.login(request, user)
             messages.success(request, 'Login successful.')
-            return redirect('home')
+            url = request.META.get('HTTP_REFERER')  # Get the previous page URL
+            try:
+                query = urlparse(url).query
+                params = parse_qs(query)
+                if 'next' in params:
+                    next_page = params['next'][0]  # get the first value of 'next'
+                    return redirect(next_page)
+            except:
+                return redirect('dashboard')
+
         else:
             messages.error(request, 'Invalid email or password.')
             return redirect('login')
-    return render(request, 'accounts/login.html')   
+
+    return render(request, 'accounts/login.html')
+ 
 
 @login_required(login_url='login')
 def logout(request):

@@ -45,7 +45,21 @@ $(document).ready(function() {
  {% include "includes/navbar.html" %}
 
 {% block content%}
+
 {% comment %} conten {% endcomment %}
 {% endblock %}
+<!-- Right Side: WhatsApp -->
+<a href="https://wa.me/9779745302768?text=I'm%20interested%20in%20your%20car%20for%20sale"
+   target="_blank"
+   style="position: fixed; bottom: 80px; right: 20px; z-index: 1000;">
+    <img src="{% static 'images/WhatsApp.webp' %}" 
+         alt="WhatsApp"
+         class="img-fluid rounded-circle shadow"
+         style="width: 80px; height: 80px;">
+</a>
+
+
+
+
 
  {% include "includes/footer.html" %}
