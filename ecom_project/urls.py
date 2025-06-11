@@ -27,4 +27,7 @@ urlpatterns = [
 
     #accounts
     path('accounts/', include('accounts.urls')),  # Make sure 'accounts' is the correct app name
+
+    #Order path
+    path('orders/', include('orders.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

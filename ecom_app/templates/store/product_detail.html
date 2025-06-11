@@ -1,126 +1,107 @@
 {% extends "base.html" %}
 {% load cart_extras %}
-
 {% load static %}
+
 {% block content %}
 
 <section class="section-content padding-y bg">
 <div class="container">
 
-<!-- ============================ COMPONENT 1 ================================= -->
-<div class="card">
-	<div class="row no-gutters">
-		<aside class="col-md-6">
-<article class="gallery-wrap"> 
-	<div class="img-big-wrap">
-	   <a href="#"><img src="{{single_product.image.url}}"></a>
-	</div> <!-- img-big-wrap.// -->
-	
-</article> <!-- gallery-wrap .end// -->
-		</aside>
-		<main class="col-md-6 border-left">
+<div class="card shadow-sm border-0 mb-4">
+    <div class="row no-gutters">
+        
+        <!-- Product Image -->
+        <aside class="col-md-6">
+            <article class="gallery-wrap p-4">
+                <div class="img-big-wrap">
+                    <a href="#"><img class="img-fluid rounded" src="{{ single_product.image.url }}"></a>
+                </div>
+            </article>
+        </aside>
 
-<form action="{% url "add_cart" single_product.id %}" method="POST">
+        <!-- Product Info -->
+        <main class="col-md-6 border-left">
+            <form action="{% url 'add_cart' single_product.id %}" method="POST">
+                {% csrf_token %}
+                
+                <article class="content-body p-4">
 
-{% csrf_token %}
+                    <h2 class="title mb-3">{{ single_product.product_name }}</h2>
+                    
+                    <div class="mb-3">
+                        <h4 class="text-success">NRs. {{ single_product.price }}</h4>
+                    </div>
 
+                    <p class="text-muted">{{ single_product.description }}</p>
 
-<article class="content-body">
+                    <hr class="my-4">
 
-<h2 class="title">{{single_product.product_name}}</h2>
+                    <!-- Color Selection -->
+                    <div class="form-group">
+                        <label><strong>Choose Color</strong></label>
+                        <select name="color" class="form-control">
+                            <option value="" disabled selected>-- Select Color --</option>
+                            {% for i in single_product.variation_set.colors %}
+                                <option value="{{ i.variation_value|lower }}">{{ i.variation_value|capfirst }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-<div class="mb-3"> 
-	<var class="price h4">NRs. {{single_product.price}}</var> 
-</div> 
+                    <!-- Size Selection -->
+                    <div class="form-group">
+                        <label><strong>Select Size</strong></label>
+                        <select name="size" class="form-control">
+                            <option value="" disabled selected>-- Select Size --</option>
+                            {% for i in single_product.variation_set.sizes %}
+                                <option value="{{ i.variation_value|lower }}">{{ i.variation_value|capfirst }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-<p>{{single_product.description}}.</p>
+                    <!-- Stock & Action -->
+                    <div class="mt-4">
+                        {% if single_product.stock <= 0 %}
+                            <div class="alert alert-danger font-weight-bold" role="alert">
+                                Out of Stock
+                            </div>
+                        {% else %}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        {% endif %}
+                    </div>
 
+                </article>
+            </form>
+        </main>
+    </div>
+</div>
 
-<hr>
-	<div class="row">
-		<div class="item-option-select">
-			<h6>Choose Color</h6>
-			<select name="color" class="form-control" id="">
-				<option value="" disabled selected>-- Select Color --</option>
+<!-- Customer Reviews -->
+<div class="row mt-5">
+    <div class="col-md-9">
+        <header class="section-heading mb-4">
+            <h4><i class="fas fa-comments"></i> Customer Reviews</h4>  
+        </header>
 
-				<option value="red">Red</option>
-				{% for i in single_product.variation_set.colors  %}
-					<option value="{{i.variation_value | lower }}">{{i.variation_value | capfirst}}</option>
+        <!-- Sample Review -->
+        <article class="box shadow-sm p-3 mb-4 rounded bg-white">
+            <div class="d-flex align-items-center mb-2">
+                <img src="{% static 'images/avatars/avatar1.jpg' %}" class="img-xs icon rounded-circle mr-2" alt="Avatar">
+                <div>
+                    <h6 class="mb-0">Mike John</h6>
+                    <small class="text-muted">24 April 2020</small>
+                </div>
+            </div>
+            <p class="mb-0 text-muted">
+                Dummy comment: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+        </article>
+    </div>
+</div>
 
-				{% endfor %}
-			</select>
-		</div>
-	</div> <!-- row.// -->
-	<div class="row">
-		<div class="item-option-select">
-			<h6>Select Size</h6>
-						<select name="size" class="form-control" id="">
-				<option value="" disabled selected>-- Select size --</option>
-
-				{% for i in single_product.variation_set.sizes  %}
-					<option value="{{i.variation_value | lower}}">{{i.variation_value | capfirst }}</option>
-
-				{% endfor %}
-			</select>
-
-		</div>
-	</div> <!-- row.// -->
-	<hr>
-{% if single_product.stock <= 0 %}
-    <h5 style="color: red; font-weight: bold; margin-top: 10px;">
-        Out of Stock
-    </h5>
-{% else %}
-
-    <button type="submit" href=" " class="btn btn-primary">
-        <span class="text">Add to cart</span>
-        <i class="fas fa-shopping-cart"></i>
-	</button>
-{% endif %}
-
-</article> <!-- product-info-aside .// -->
-</form>
-		</main> <!-- col.// -->
-	</div> <!-- row.// -->
-</div> <!-- card.// -->
-<!-- ============================ COMPONENT 1 END .// ================================= -->
-
-<br>
-
-<div class="row">
-			<div class="col-md-9">
-
-	<header class="section-heading">
-		<h3>Customer Reviews </h3>  
-		
-	</header>
-
-	<article class="box mb-3">
-		<div class="icontext w-100">
-			<img src="{%static './images/avatars/avatar1.jpg'%}" class="img-xs icon rounded-circle">
-			<div class="text">
-				<span class="date text-muted float-md-right">24.04.2020 </span>  
-				<h6 class="mb-1">Mike John </h6>
-				
-			</div>
-		</div> <!-- icontext.// -->
-		<div class="mt-3">
-			<p>
-				Dummy comment Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-				quis nostrud exercitation ullamco laboris nisi ut aliquip
-			</p>	
-		</div>
-	</article>
-
-	
-
-	</div> <!-- col.// -->
-</div> <!-- row.// -->
-
-
-</div> <!-- container .//  -->
+</div>
 </section>
-<!-- ===
 
 {% endblock %}
